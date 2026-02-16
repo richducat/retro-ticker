@@ -55,6 +55,23 @@ function fmtUsd(n) {
     /\/\/ __TICKER_DATA__\n/, 
     `window.TICKER_DATA = ${JSON.stringify(data)};\n`
   );
+
+  const statsHtml = [
+    ['Balance', data.balanceUsd],
+    ['Exposure', data.exposureUsd],
+    ['Positions', data.positionsCount],
+    ['PnL', data.totalPnlUsd],
+  ].map(([label, value]) => (
+    `<div class=\"card\"><div class=\"label\">${label}</div><div class=\"value\">${value}</div></div>`
+  )).join('');
+
+  const tickerText = (data.lastTrades || []).map(t => `${t.side} ${t.symbol} ${t.price} (${t.size})`).join('  •  ') || 'NO RECENT TRADES';
+
+  indexHtml = indexHtml
+    .replace(/<!-- STATS_HTML -->[\s\S]*?<!--/m, `<!-- STATS_HTML -->${statsHtml}<!--`)
+    .replace(/<!-- TICKER_TEXT -->[\s\S]*?<!--/m, `<!-- TICKER_TEXT -->${tickerText}<!--`)
+    .replace(/<!-- UPDATED_AT -->[\s\S]*?<!--/m, `<!-- UPDATED_AT -->${data.updatedAt}<!--`);
+
   fs.writeFileSync(indexPath, indexHtml);
 
   console.log('Updated', outJson, outJs, 'and inline data in index.html');
