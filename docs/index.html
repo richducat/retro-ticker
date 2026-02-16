@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Retro Ticker</title>
+  <base href="/retro-ticker/">
   <style>
     :root {
       --bg: #050805;
@@ -86,7 +87,7 @@
   <script>
     async function load() {
       try {
-        const res = await fetch('./data.json', { cache: 'no-store' });
+        const res = await fetch('/retro-ticker/data.json', { cache: 'no-store' });
         const data = await res.json();
         const stats = document.getElementById('stats');
         stats.innerHTML = '';
