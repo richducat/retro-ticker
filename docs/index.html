@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Retro Ticker</title>
-  <base href="/retro-ticker/">
+  <!-- base removed -->
   <style>
     :root {
       --bg: #050805;
@@ -87,7 +87,8 @@
   <script>
     async function load() {
       try {
-        const res = await fetch('/retro-ticker/data.json', { cache: 'no-store' });
+        const res = await fetch(`https://richducat.github.io/retro-ticker/data.json?ts=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const stats = document.getElementById('stats');
         stats.innerHTML = '';
@@ -110,6 +111,7 @@
         document.getElementById('updated').textContent = `Last update: ${data.updatedAt}`;
       } catch (e) {
         document.getElementById('tickerText').textContent = 'DATA LOAD ERROR';
+        document.getElementById('updated').textContent = `Last update: ERROR (${e.message})`;
       }
     }
 
