@@ -30,11 +30,18 @@ function fmtUsd(n) {
   const tradesArr = Array.isArray(trades) ? trades : (trades?.trades || trades?.data || []);
   const positionsArr = Array.isArray(positions) ? positions : (positions?.positions || positions?.data || []);
 
+  const balanceRaw = portfolio?.balance_usd ?? portfolio?.balanceUsd;
+  const exposureRaw = portfolio?.exposure_usd ?? portfolio?.exposureUsd;
+  const pnlRaw = portfolio?.total_pnl_usd ?? portfolio?.totalPnlUsd;
+
+  const fallbackExposure = positions?.total_value ?? positions?.totalValue;
+  const fallbackPnl = positions?.polymarket_pnl ?? positions?.sim_pnl ?? positions?.pnl;
+
   const data = {
-    balanceUsd: fmtUsd(portfolio?.balance_usd ?? portfolio?.balanceUsd),
-    exposureUsd: fmtUsd(portfolio?.exposure_usd ?? portfolio?.exposureUsd),
+    balanceUsd: fmtUsd(balanceRaw),
+    exposureUsd: fmtUsd((Number(exposureRaw)||0) ? exposureRaw : fallbackExposure),
     positionsCount: positionsArr.length || (positions?.count ?? 0),
-    totalPnlUsd: fmtUsd(portfolio?.total_pnl_usd ?? portfolio?.totalPnlUsd),
+    totalPnlUsd: fmtUsd((Number(pnlRaw)||0) ? pnlRaw : fallbackPnl),
     lastTrades: tradesArr.slice(0,5).map(t => ({
       side: (t.action ? t.action.toUpperCase() : '') + (t.side ? ` ${t.side.toUpperCase()}` : '') || 'TRADE',
       symbol: t.market_question || t.question || t.symbol || t.market || t.asset || 'UNKNOWN',
