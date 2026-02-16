@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Retro Ticker</title>
+  <style>
+    :root {
+      --bg: #050805;
+      --green: #39ff14;
+      --green-dim: #1bb30b;
+      --grid: rgba(57, 255, 20, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--green);
+      font-family: "IBM Plex Mono", "Courier New", monospace;
+      overflow: hidden; height: 100vh; width: 100vw;
+    }
+    .scanlines {
+      position: fixed; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,0) 2px,
+        rgba(0,0,0,0.15) 3px,
+        rgba(0,0,0,0.15) 4px
+      );
+      mix-blend-mode: multiply;
+    }
+    .grid {
+      position: fixed; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.4;
+    }
+    .wrap { padding: 24px; height: 100%; display: flex; flex-direction: column; gap: 16px; }
+    .title {
+      font-size: 20px; letter-spacing: 2px; text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(57,255,20,0.6);
+    }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+    .card {
+      border: 1px solid var(--green-dim); padding: 12px;
+      background: rgba(0, 20, 0, 0.4);
+      box-shadow: inset 0 0 12px rgba(57,255,20,0.15);
+    }
+    .label { font-size: 12px; color: var(--green-dim); }
+    .value { font-size: 22px; margin-top: 6px; }
+    .ticker {
+      border: 1px solid var(--green-dim);
+      padding: 10px 0; overflow: hidden; white-space: nowrap;
+      background: rgba(0, 20, 0, 0.5);
+      box-shadow: inset 0 0 12px rgba(57,255,20,0.15);
+    }
+    .ticker span {
+      display: inline-block; padding-left: 100%;
+      animation: scroll 30s linear infinite;
+      text-shadow: 0 0 6px rgba(57,255,20,0.5);
+    }
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    .footer { font-size: 12px; color: var(--green-dim); }
+    .blink { animation: blink 1.2s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .value { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="scanlines"></div>
+  <div class="wrap">
+    <div class="title">Retro Market Ticker <span class="blink">▮</span></div>
+    <div class="stats" id="stats"></div>
+    <div class="ticker"><span id="tickerText">Loading…</span></div>
+    <div class="footer" id="updated">Last update: --</div>
+  </div>
+
+  <script>
+    async function load() {
+      try {
+        const res = await fetch('./data.json', { cache: 'no-store' });
+        const data = await res.json();
+        const stats = document.getElementById('stats');
+        stats.innerHTML = '';
+
+        const cards = [
+          ['Balance', data.balanceUsd],
+          ['Exposure', data.exposureUsd],
+          ['Positions', data.positionsCount],
+          ['PnL', data.totalPnlUsd],
+        ];
+        for (const [label, value] of cards) {
+          const el = document.createElement('div');
+          el.className = 'card';
+          el.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+          stats.appendChild(el);
+        }
+
+        const trades = (data.lastTrades || []).map(t => `${t.side} ${t.symbol} ${t.price} (${t.size})`).join('  •  ');
+        document.getElementById('tickerText').textContent = trades || 'NO RECENT TRADES';
+        document.getElementById('updated').textContent = `Last update: ${data.updatedAt}`;
+      } catch (e) {
+        document.getElementById('tickerText').textContent = 'DATA LOAD ERROR';
+      }
+    }
+
+    load();
+    // refresh view hourly
+    setInterval(load, 60 * 60 * 1000);
+  </script>
+</body>
+</html>
