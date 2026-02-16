@@ -43,7 +43,11 @@ function fmtUsd(n) {
     updatedAt: new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }) + ' ET'
   };
 
-  const outPath = path.resolve('docs/data.json');
-  fs.writeFileSync(outPath, JSON.stringify(data, null, 2));
-  console.log('Updated', outPath);
+  const outJson = path.resolve('docs/data.json');
+  fs.writeFileSync(outJson, JSON.stringify(data, null, 2));
+
+  const outJs = path.resolve('docs/data.js');
+  fs.writeFileSync(outJs, `window.TICKER_DATA = ${JSON.stringify(data)};`);
+
+  console.log('Updated', outJson, 'and', outJs);
 })();

@@ -84,31 +84,40 @@
     <div class="footer" id="updated">Last update: --</div>
   </div>
 
+  <script src="./data.js"></script>
   <script>
+    function render(data) {
+      const stats = document.getElementById('stats');
+      stats.innerHTML = '';
+
+      const cards = [
+        ['Balance', data.balanceUsd],
+        ['Exposure', data.exposureUsd],
+        ['Positions', data.positionsCount],
+        ['PnL', data.totalPnlUsd],
+      ];
+      for (const [label, value] of cards) {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+        stats.appendChild(el);
+      }
+
+      const trades = (data.lastTrades || []).map(t => `${t.side} ${t.symbol} ${t.price} (${t.size})`).join('  •  ');
+      document.getElementById('tickerText').textContent = trades || 'NO RECENT TRADES';
+      document.getElementById('updated').textContent = `Last update: ${data.updatedAt}`;
+    }
+
     async function load() {
       try {
+        if (window.TICKER_DATA) {
+          render(window.TICKER_DATA);
+          return;
+        }
         const res = await fetch(`https://richducat.github.io/retro-ticker/data.json?ts=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const stats = document.getElementById('stats');
-        stats.innerHTML = '';
-
-        const cards = [
-          ['Balance', data.balanceUsd],
-          ['Exposure', data.exposureUsd],
-          ['Positions', data.positionsCount],
-          ['PnL', data.totalPnlUsd],
-        ];
-        for (const [label, value] of cards) {
-          const el = document.createElement('div');
-          el.className = 'card';
-          el.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
-          stats.appendChild(el);
-        }
-
-        const trades = (data.lastTrades || []).map(t => `${t.side} ${t.symbol} ${t.price} (${t.size})`).join('  •  ');
-        document.getElementById('tickerText').textContent = trades || 'NO RECENT TRADES';
-        document.getElementById('updated').textContent = `Last update: ${data.updatedAt}`;
+        render(data);
       } catch (e) {
         document.getElementById('tickerText').textContent = 'DATA LOAD ERROR';
         document.getElementById('updated').textContent = `Last update: ERROR (${e.message})`;
