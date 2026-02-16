@@ -84,8 +84,8 @@
     <div class="footer" id="updated">Last update: --</div>
   </div>
 
-  <script src="./data.js"></script>
   <script>
+    window.TICKER_DATA = {"balanceUsd":"$0.00","exposureUsd":"$0.00","positionsCount":0,"totalPnlUsd":"$0.00","lastTrades":[{"side":"no","symbol":"UNKNOWN","price":"--","size":"--"},{"side":"no","symbol":"UNKNOWN","price":"--","size":"--"},{"side":"no","symbol":"UNKNOWN","price":"--","size":"--"},{"side":"no","symbol":"UNKNOWN","price":"--","size":"--"},{"side":"yes","symbol":"UNKNOWN","price":"--","size":"--"}],"updatedAt":"2/16/2026, 1:21:30 AM ET"};
     function render(data) {
       const stats = document.getElementById('stats');
       stats.innerHTML = '';

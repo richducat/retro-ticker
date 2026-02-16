@@ -49,5 +49,13 @@ function fmtUsd(n) {
   const outJs = path.resolve('docs/data.js');
   fs.writeFileSync(outJs, `window.TICKER_DATA = ${JSON.stringify(data)};`);
 
-  console.log('Updated', outJson, 'and', outJs);
+  const indexPath = path.resolve('docs/index.html');
+  let indexHtml = fs.readFileSync(indexPath, 'utf8');
+  indexHtml = indexHtml.replace(
+    /\/\/ __TICKER_DATA__\n/, 
+    `window.TICKER_DATA = ${JSON.stringify(data)};\n`
+  );
+  fs.writeFileSync(indexPath, indexHtml);
+
+  console.log('Updated', outJson, outJs, 'and inline data in index.html');
 })();
