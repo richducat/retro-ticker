@@ -28,17 +28,18 @@ function fmtUsd(n) {
   ]);
 
   const tradesArr = Array.isArray(trades) ? trades : (trades?.trades || trades?.data || []);
+  const positionsArr = Array.isArray(positions) ? positions : (positions?.positions || positions?.data || []);
 
   const data = {
     balanceUsd: fmtUsd(portfolio?.balance_usd ?? portfolio?.balanceUsd),
     exposureUsd: fmtUsd(portfolio?.exposure_usd ?? portfolio?.exposureUsd),
-    positionsCount: Array.isArray(positions) ? positions.length : (positions?.count ?? 0),
+    positionsCount: positionsArr.length || (positions?.count ?? 0),
     totalPnlUsd: fmtUsd(portfolio?.total_pnl_usd ?? portfolio?.totalPnlUsd),
     lastTrades: tradesArr.slice(0,5).map(t => ({
-      side: t.side || t.direction || 'TRADE',
-      symbol: t.symbol || t.market || t.asset || 'UNKNOWN',
-      price: t.price != null ? `$${Number(t.price).toFixed(4)}` : '--',
-      size: t.size != null ? Number(t.size).toFixed(4) : '--'
+      side: (t.action ? t.action.toUpperCase() : '') + (t.side ? ` ${t.side.toUpperCase()}` : '') || 'TRADE',
+      symbol: t.market_question || t.question || t.symbol || t.market || t.asset || 'UNKNOWN',
+      price: t.price_before != null ? `$${Number(t.price_before).toFixed(3)}` : (t.price != null ? `$${Number(t.price).toFixed(3)}` : '--'),
+      size: t.shares != null ? Number(t.shares).toFixed(2) : (t.size != null ? Number(t.size).toFixed(2) : '--')
     })),
     updatedAt: new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }) + ' ET'
   };
